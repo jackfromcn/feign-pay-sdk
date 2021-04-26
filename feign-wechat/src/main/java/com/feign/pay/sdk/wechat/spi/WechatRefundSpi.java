@@ -33,11 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @seehttp://coupon-center.zvcms.com/doc.html
- * @author wencheng
- * @date 2020/12/22
- */
 @FeignClient(name = "wechatRefundSpi",
         url = "https://api.mch.weixin.qq.com",
         configuration = WechatRefundSpi.Config.class
