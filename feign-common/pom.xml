@@ -20,11 +20,6 @@
             <version>2.0.2.RELEASE</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
-        </dependency>
-
         <!--http begin-->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
