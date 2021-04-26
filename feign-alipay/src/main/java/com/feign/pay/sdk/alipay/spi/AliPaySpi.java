@@ -53,9 +53,6 @@ public interface AliPaySpi {
         @Bean
         public RequestInterceptor requestInterceptor() {
             return requestTemplate -> {
-                if (Objects.isNull(client)) {
-                    throw new RuntimeException("配置异常");
-                }
                 try {
                     requestTemplate.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
