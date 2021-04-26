@@ -1,0 +1,11 @@
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+/logs/
+*/target
+*.DS_Store
+*.log
+*dubbo.cache
+*dubbo.cache.lock
