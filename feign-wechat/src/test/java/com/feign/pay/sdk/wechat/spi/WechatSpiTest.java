@@ -1,15 +1,15 @@
 package com.feign.pay.sdk.wechat.spi;
 
 import com.feign.pay.sdk.common.util.JsonUtil;
-import com.feign.pay.sdk.wechat.dto.request.QueryRequest;
+import com.feign.pay.sdk.wechat.dto.request.OrderRequest;
 import com.feign.pay.sdk.wechat.dto.request.RefundQueryRequest;
+import com.feign.pay.sdk.wechat.dto.response.OrderQueryResponse;
+import com.feign.pay.sdk.wechat.dto.response.RefundQueryResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Map;
 
 /**
  * Created by wencheng on 2020/12/22.
@@ -21,18 +21,18 @@ import java.util.Map;
 public class WechatSpiTest {
 
     @Autowired
-    private WechatPaySpi wechatPaySpi;
+    private WechatSpi wechatSpi;
 
     @Test
     public void test() {
-        QueryRequest request = new QueryRequest();
+        OrderRequest request = new OrderRequest();
         request.setAppId("wx95f37bd995875ae0");
         request.setMchId("1495139482");
         request.setTransactionId("1008450740201411110005820873");
         request.setOutTradeNo(null);
         request.setSignType("MD5");
 
-        QueryResponse response = wechatPaySpi.queryOrder(request);
+        OrderQueryResponse response = wechatSpi.queryOrder(request);
         System.out.println(JsonUtil.toJson(response));
     }
 
@@ -47,7 +47,7 @@ public class WechatSpiTest {
         request.setAppId("wx95f37bd995875ae0");
         request.setMchId("1495139482");
         request.setSignType("MD5");
-        Map<String, Object> map = wechatPaySpi.queryRefund(request);
+        RefundQueryResponse map = wechatSpi.queryRefund(request);
         System.out.println(JsonUtil.toJson(map));
     }
 

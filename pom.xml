@@ -12,6 +12,7 @@
         <module>feign-pom</module>
         <module>feign-common</module>
         <module>feign-wechat</module>
+        <module>feign-alipay</module>
     </modules>
 
 </project>

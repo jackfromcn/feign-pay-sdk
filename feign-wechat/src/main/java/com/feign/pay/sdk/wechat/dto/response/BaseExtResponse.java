@@ -1,6 +1,6 @@
 package com.feign.pay.sdk.wechat.dto.response;
 
-import com.zm.pay.channel.proxy.wechat.spi.context.RespModelConfig;
+import com.feign.pay.sdk.wechat.spi.context.RespModelConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

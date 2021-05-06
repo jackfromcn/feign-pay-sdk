@@ -2,7 +2,9 @@ package com.feign.pay.sdk.wechat.dto.request;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.feign.pay.sdk.wechat.spi.context.WXPayConstants.SignType;
+import com.feign.pay.sdk.wechat.spi.context.WxPayConstants;
+import com.feign.pay.sdk.wechat.spi.context.WxPayConstants.SignType;
+import com.feign.pay.sdk.wechat.spi.context.WxPayUtil;
 import lombok.Data;
 
 import java.lang.reflect.Field;
