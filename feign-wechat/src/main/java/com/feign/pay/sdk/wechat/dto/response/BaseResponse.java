@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @JacksonXmlRootElement(localName = "xml")
-public class QueryResponse {
+public class BaseResponse extends Response {
 
     /**
      * 公众账号ID
@@ -68,12 +68,4 @@ public class QueryResponse {
      */
     @JacksonXmlProperty(localName = "err_code_des")
     private String errCodeDes;
-
-    /**
-     * 是否重调
-     * 是否需要继续调用撤销，Y-需要，N-不需要
-     */
-    @JacksonXmlProperty(localName = "recall")
-    private String recall;
-
 }

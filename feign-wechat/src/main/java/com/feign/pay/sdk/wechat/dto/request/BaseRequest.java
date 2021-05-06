@@ -2,9 +2,7 @@ package com.feign.pay.sdk.wechat.dto.request;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.feign.pay.sdk.wechat.spi.context.WXPayConstants;
 import com.feign.pay.sdk.wechat.spi.context.WXPayConstants.SignType;
-import com.feign.pay.sdk.wechat.spi.context.WXPayUtil;
 import lombok.Data;
 
 import java.lang.reflect.Field;
@@ -52,17 +50,17 @@ public abstract class BaseRequest {
      * HMAC-SHA256	签名类型，目前支持HMAC-SHA256和MD5，默认为MD5
      */
     @JacksonXmlProperty(localName = "sign_type")
-    private String signType = WXPayConstants.MD5;
+    private String signType = WxPayConstants.MD5;
 
     public BaseRequest() {
-        this.nonceStr = WXPayUtil.generateNonceStr();
+        this.nonceStr = WxPayUtil.generateNonceStr();
     }
 
     public String getSign() {
         try {
             Map<String, String> params = convertObjToMap();
             SignType signType = SignType.valueOf(this.signType);
-            return WXPayUtil.generateSignature(params, "zhimaikejigufenyouxiangongsi2017", signType);
+            return WxPayUtil.generateSignature(params, "zhimaikejigufenyouxiangongsi2017", signType);
         } catch (Exception e) {}
         return null;
     }

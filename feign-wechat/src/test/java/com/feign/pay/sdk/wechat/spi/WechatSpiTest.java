@@ -3,7 +3,6 @@ package com.feign.pay.sdk.wechat.spi;
 import com.feign.pay.sdk.common.util.JsonUtil;
 import com.feign.pay.sdk.wechat.dto.request.QueryRequest;
 import com.feign.pay.sdk.wechat.dto.request.RefundQueryRequest;
-import com.feign.pay.sdk.wechat.dto.response.QueryResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

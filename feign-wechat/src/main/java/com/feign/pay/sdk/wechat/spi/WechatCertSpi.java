@@ -1,9 +1,11 @@
 package com.feign.pay.sdk.wechat.spi;
 
 import com.feign.pay.sdk.common.util.feign.AbstractConfig;
-import com.feign.pay.sdk.wechat.dto.request.QueryRequest;
+import com.feign.pay.sdk.wechat.dto.request.DownloadfundflowRequeset;
 import com.feign.pay.sdk.wechat.dto.request.RefundQueryRequest;
-import com.feign.pay.sdk.wechat.dto.response.QueryResponse;
+import com.feign.pay.sdk.wechat.dto.request.RefundRequest;
+import com.feign.pay.sdk.wechat.dto.response.RefundResponse;
+import com.feign.pay.sdk.wechat.dto.response.ReverseResponse;
 import com.feign.pay.sdk.wechat.spi.context.WechatProperties;
 import feign.Logger;
 import org.apache.http.config.RegistryBuilder;
@@ -31,13 +33,17 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * @seehttp://coupon-center.zvcms.com/doc.html
+ * @author wencheng
+ * @date 2020/12/22
+ */
 @FeignClient(name = "wechatRefundSpi",
         url = "https://api.mch.weixin.qq.com",
-        configuration = WechatRefundSpi.Config.class
+        configuration = WechatCertSpi.Config.class
 )
-public interface WechatRefundSpi {
+public interface WechatCertSpi {
 
     /**
      * 查询订单
@@ -45,8 +51,8 @@ public interface WechatRefundSpi {
      * @param request
      * @return
      */
-    @PostMapping(value = "/pay/orderquery", consumes = MediaType.APPLICATION_XML_VALUE)
-    QueryResponse queryOrder(QueryRequest request);
+    @PostMapping(value = "/secapi/pay/refund", consumes = MediaType.APPLICATION_XML_VALUE)
+    RefundResponse refund(RefundRequest request);
 
     /**
      * 查询退款
@@ -54,8 +60,17 @@ public interface WechatRefundSpi {
      * @param request
      * @return
      */
-    @PostMapping(value = "/pay/refundquery", consumes = MediaType.APPLICATION_XML_VALUE)
-    Map<String, Object> queryRefund(RefundQueryRequest request);
+    @PostMapping(value = "/secapi/pay/reverse", consumes = MediaType.APPLICATION_XML_VALUE)
+    ReverseResponse reverse(RefundQueryRequest request);
+
+    /**
+     * 下载资金账单
+     * 文档: https://pay.weixin.qq.com/wiki/doc/api/micropay.php?chapter=9_18&index=7
+     * @param request
+     * @return
+     */
+    @PostMapping(value = "/pay/downloadfundflow", consumes = MediaType.APPLICATION_XML_VALUE)
+    String downloadfundflow(DownloadfundflowRequeset request);
 
     class Config extends AbstractConfig {
 
@@ -68,8 +83,8 @@ public interface WechatRefundSpi {
          */
         @Override
         protected CloseableHttpClient getHttpClient() {
+            CloseableHttpClient httpClient;
             try {
-                CloseableHttpClient httpClient;
                 // 证书
                 char[] password = properties.getMchId().toCharArray();
                 InputStream certStream = new FileInputStream(properties.getCertStreamUrl());
@@ -110,10 +125,10 @@ public interface WechatRefundSpi {
                 connectionManager.setDefaultSocketConfig(socketConfig);
                 httpClient = HttpClients.custom().setConnectionManager(connectionManager)
                         .build();
-                return httpClient;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            return httpClient;
         }
 
         @Bean
