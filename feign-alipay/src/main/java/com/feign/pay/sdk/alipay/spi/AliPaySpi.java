@@ -6,9 +6,11 @@ import com.alipay.api.internal.util.WebUtils;
 import com.feign.pay.sdk.alipay.domain.AlipayTradePayModel;
 import com.feign.pay.sdk.alipay.spi.context.AlipayClient;
 import com.feign.pay.sdk.alipay.spi.context.AlipayRequest;
+import com.feign.pay.sdk.alipay.spi.context.SignUtil;
 import com.feign.pay.sdk.common.util.feign.AbstractConfig;
-import feign.Logger;
-import feign.RequestInterceptor;
+import com.feign.pay.sdk.common.util.feign.ApacheHttpClient;
+import feign.*;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.*;
 
 
@@ -85,6 +89,28 @@ public interface AliPaySpi {
             request.setApiVersion("1.0");
             request.setNeedEncrypt(false);
             return request;
+        }
+
+        @Bean
+        @Override
+        public Client client() {
+            return new ApacheHttpClient(getHttpClient()) {
+                @Override
+                public Response execute(Request request, Request.Options options) throws IOException {
+                    Response response = super.execute(request, options);
+                    Optional<String> needEncrypt = SignUtil.getHeader(request, "needEncrypt");
+                    Charset charset = Objects.nonNull(request.charset()) ? request.charset() : Charset.forName("utf-8");
+                    String content;
+                    if (!needEncrypt.isPresent() || !Boolean.valueOf(needEncrypt.get())) {
+                        content = SignUtil.undecryptResponse(request, IOUtils.toString(response.body().asInputStream(), charset.toString()));
+                    } else {
+                        content = SignUtil.decryptResponse(client, request, IOUtils.toString(response.body().asInputStream(), charset.toString()));
+                    }
+                    return response.toBuilder()
+                            .body(content, request.charset())
+                            .build();
+                }
+            };
         }
 
         @Bean
