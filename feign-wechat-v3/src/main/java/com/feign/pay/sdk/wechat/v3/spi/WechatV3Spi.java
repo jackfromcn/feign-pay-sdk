@@ -1,15 +1,17 @@
 package com.feign.pay.sdk.wechat.v3.spi;
 
 import com.feign.pay.sdk.common.util.feign.AbstractConfig;
-import com.feign.pay.sdk.common.util.feign.BaseBaseMultipartFileModel;
-import com.feign.pay.sdk.common.util.feign.FormHttpMessageConverter;
+import com.feign.pay.sdk.common.util.feign.ApacheHttpClient;
 import com.feign.pay.sdk.wechat.v3.config.WechatProperties;
+import com.feign.pay.sdk.wechat.v3.dto.request.WeChatApplyMentRequest;
+import com.feign.pay.sdk.wechat.v3.dto.response.WeChatApplyMentResponse;
+import com.feign.pay.sdk.wechat.v3.dto.response.WeChatApplyMentStatusResponse;
+import com.feign.pay.sdk.wechat.v3.dto.response.WechatMediaUploadResponse;
 import com.feign.pay.sdk.wechat.v3.spi.context.V3Context;
 import com.wechat.pay.contrib.apache.httpclient.WechatPayHttpClientBuilder;
 import com.wechat.pay.contrib.apache.httpclient.auth.AutoUpdateCertificatesVerifier;
 import com.wechat.pay.contrib.apache.httpclient.auth.WechatPay2Validator;
-import feign.Logger;
-import feign.RequestInterceptor;
+import feign.*;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -18,12 +20,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.PrivateKey;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @seehttp://coupon-center.zvcms.com/doc.html
@@ -37,13 +41,39 @@ import java.util.List;
 public interface WechatV3Spi {
 
     /**
-     * 付款码支付
-     * 文档: https://pay.weixin.qq.com/wiki/doc/api/micropay.php?chapter=9_10&index=1
-     * @param model
+     * 图片上传
+     * @param file
      * @return
      */
     @PostMapping(value = "/v3/merchant/media/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    String upload(BaseBaseMultipartFileModel model);
+    WechatMediaUploadResponse upload(@RequestPart("file")MultipartFile file, @RequestPart("meta") String meta, @RequestHeader("meta") String header);
+
+    /**
+     * 进件提交申请单API
+     *
+     * @param request 请求
+     * @return WeChatApplyMentResponse
+     */
+    @PostMapping(value = "/v3/applyment4sub/applyment/", consumes = MediaType.APPLICATION_JSON_VALUE)
+    WeChatApplyMentResponse applyMent(WeChatApplyMentRequest request, @RequestHeader("Wechatpay-Serial") String mchSerialNo);
+
+    /**
+     * 根据business_code查询进件状态
+     *
+     * @param businessCode 参数
+     * @return WeChatApplyMentStatusResponse
+     */
+    @PostMapping(value = "/v3/applyment4sub/applyment/business_code/{business_code}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    WeChatApplyMentStatusResponse applyMentStatusByCode(@PathVariable("business_code") String businessCode);
+
+    /**
+     * applyment_id
+     *
+     * @param applyMentId 参数
+     * @return WeChatApplyMentStatusResponse
+     */
+    @PostMapping(value = "/v3/applyment4sub/applyment/applyment_id/{applyment_id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    WeChatApplyMentStatusResponse applyMentStatusById(@PathVariable("applyment_id") Integer applyMentId);
 
     class Config extends AbstractConfig {
 
@@ -68,9 +98,16 @@ public interface WechatV3Spi {
         }
 
         @Override
-        protected List<HttpMessageConverter<?>> getEncoderConverters() {
-            FormHttpMessageConverter formHttpMessageConverter = new FormHttpMessageConverter();
-            return Collections.singletonList(formHttpMessageConverter);
+        public Client client() {
+            return new ApacheHttpClient(getHttpClient()) {
+                @Override
+                public Response execute(Request request, Request.Options options) throws IOException {
+                    Response response = super.execute(request, options);
+                    return response.toBuilder()
+                            .status(200)
+                            .build();
+                }
+            };
         }
 
         @Override

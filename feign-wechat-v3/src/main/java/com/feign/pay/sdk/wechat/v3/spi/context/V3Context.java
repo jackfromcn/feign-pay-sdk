@@ -3,6 +3,7 @@ package com.feign.pay.sdk.wechat.v3.spi.context;
 import com.feign.pay.sdk.common.util.SpringContextUtil;
 import com.feign.pay.sdk.wechat.v3.config.WechatProperties;
 import com.feign.pay.sdk.wechat.v3.spi.DownLoadSpi;
+import com.feign.pay.sdk.wechat.v3.spi.context.sdk.util.PemUtil;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -13,12 +14,7 @@ import com.wechat.pay.contrib.apache.httpclient.auth.WechatPay2Credentials;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,7 +45,7 @@ public class V3Context {
                         DownLoadSpi loadSpi = SpringContextUtil.getBean(DownLoadSpi.class);
                         // TODO: 2021/5/8
                         String privateKeyStr = loadSpi.load(new URI(config.getCertStreamUrl()));
-                        PrivateKey merchantPrivateKey = loadPrivateKey(privateKeyStr);
+                        PrivateKey merchantPrivateKey = PemUtil.loadPrivateKey(privateKeyStr);
 
                         //使用自动更新的签名验证器，不需要传入证书
                         AutoUpdateCertificatesVerifier verifier = new AutoUpdateCertificatesVerifier(
@@ -80,22 +76,5 @@ public class V3Context {
 
     public String getPrivateKeyStr() {
         return privateKeyStr;
-    }
-
-    private static PrivateKey loadPrivateKey(String privateKey) {
-        try {
-            privateKey = privateKey
-                    .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s+", "");
-
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            return kf.generatePrivate(
-                    new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey)));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("当前Java环境不支持RSA", e);
-        } catch (InvalidKeySpecException e) {
-            throw new RuntimeException("无效的密钥格式");
-        }
     }
 }
